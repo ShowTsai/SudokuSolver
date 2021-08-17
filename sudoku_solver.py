@@ -157,12 +157,6 @@ T1 = PhotoImage(data=Type1)
 Type2 = Images.img4
 T2 = PhotoImage(data=Type2)
 
-from icon import Icon
-with open('tmp.ico','wb') as tmp:
-    tmp.write(base64.b64decode(Icon().img))
-win.iconbitmap('tmp.ico')
-os.remove('tmp.ico')
-
 num = []
 entrys = []
 
