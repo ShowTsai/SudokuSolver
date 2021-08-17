@@ -141,7 +141,7 @@ def closeWindow():
 
 win = Tk()
 win.title('SUDOKU')
-win.geometry('630x800')
+win.geometry('650x800')
 win.resizable(0, 0)
 win.protocol('WM_DELETE_WINDOW', closeWindow)
 
@@ -280,6 +280,7 @@ class MyDialog:
         top.resizable(0, 0)
         top.wm_geometry("300x430")
         top.attributes('-topmost', 'true')
+        top.wait_visibility()
         top.grab_set()
         top.wm_title('key in')
         top.focus()
@@ -337,9 +338,9 @@ class myLabel(Label):
         self.bind("<Button-1>", self.mouseClick)
 
 b1 = Button(master=win, image=S, command=go, cursor='star')
-b1.place(x=45, y=550, anchor='nw')
+b1.place(x=45, y=580, anchor='nw')
 b2 = Button(master=win, image=C, command=cl, cursor='pirate')
-b2.place(x=325, y=550, anchor='nw')
+b2.place(x=325, y=580, anchor='nw')
 tb = myLabel(master=win, image=T1, cursor='target')
 tb.place(x=260, y=700, anchor='nw')
 write()
