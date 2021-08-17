@@ -8,7 +8,6 @@ import os
 import inspect
 import ctypes
 
-#sudoku
 sudoku = [0 for i in range(81)]
 tempNum = [0 for i in range(81)]
 tempSp = 0
@@ -18,44 +17,79 @@ startB = [0 for i in range(81)]
 addH = [0 for i in range(9)]
 addV = [0 for i in range(9)]
 addB = [0 for i in range(9)]
+L = 'LightBlue'
+C = 'cornsilk'
+Color = [L, L, L, C, C, C, L, L, L,
+         L, L, L, C, C, C, L, L, L,
+         L, L, L, C, C, C, L, L, L,
+         C, C, C, L, L, L, C, C, C,
+         C, C, C, L, L, L, C, C, C,
+         C, C, C, L, L, L, C, C, C,
+         L, L, L, C, C, C, L, L, L,
+         L, L, L, C, C, C, L, L, L,
+         L, L, L, C, C, C, L, L, L]
+
+store = [False for i in range(81)]
+
+def printSudoku():
+    global sudoku
+    for i in range(81):
+        print('%2d' % sudoku[i], end='')
+        if i % 9 == 8:
+            print()
 
 def init():
-    global startH, startV, startB, addH, addV, addB, tempSp
+    global addB, addH, addV, startB, startV, tempSp
     tempSp = 0
     for i in range(81):
-        startH[i] = i//9 * 9     
-        startV[i] = i % 9              
-        startB[i] = ((i//9)//3)*27 + ((i%9)//3)*3
-    for i in range(9):
-        addH[i] = i                           
-        addV[i] = i*9                        
-        addB[i] = (i//3)*9 + (i%3)
+        startH[i] = i // 9 * 9
+        startV[i] = i % 9
+        startB[i] = i // 9 // 3 * 27 + i % 9 // 3 * 3
 
-def tryAns():
-    global sudoku
-    sp = getNextBlank(-1)
-    while True:
-        sudoku[sp] += 1
-        if sudoku[sp] > 9:
-            sudoku[sp] = 0
-            sp = pop()
-        else:
-            if check(sp) == 0:
-                push(sp)                      
-                sp = getNextBlank(sp)
-        if not(sp >= 0 and sp < 81):
-            break
+    for i in range(9):
+        addH[i] = i
+        addV[i] = i * 9
+        addB[i] = i // 3 * 9 + i % 3
+
+    print('init done')
+
 
 def getNextBlank(sp):
-    global sudoku
-    while True:
+    while 1:
         sp += 1
-        if not(sp < 81 and sudoku[sp] > 0):
+        if not (sp < 81 and sudoku[sp] > 0):
             break
+
     return sp
 
+
+def Push(sp):
+    global tempNum
+    global tempSp
+    tempNum[tempSp] = sp
+    tempSp += 1
+
+
+def Pop():
+    global tempSp
+    if tempSp <= 0:
+        return -1
+    else:
+        tempSp -= 1
+        return tempNum[tempSp]
+
+
+def check1(sp, start, addNum):
+    fg = 0
+    for i in range(9):
+        sp1 = start + addNum[i]
+        if sp != sp1 and sudoku[sp] == sudoku[sp1]:
+            fg += 1
+
+    return fg
+
+
 def check(sp):
-    global startH, startV, startB, addH, addV, addB
     fg = 0
     if fg == 0:
         fg = check1(sp, startH[sp], addH)
@@ -65,39 +99,19 @@ def check(sp):
         fg = check1(sp, startB[sp], addB)
     return fg
 
-def check1(sp, start, addNum):
-    global sudoku
-    fg = 0
-    for i in range(9):
-        sp1 = start + addNum[i]
-        if sp != sp1 and sudoku[sp] == sudoku[sp1]:
-            fg += 1
-    return fg
 
-def push(sp):
-    global tempNum, tempSp
-    tempNum[tempSp] = sp
-    tempSp += 1
-
-def pop():
-    global tempNum, tempSp
-    if tempSp <= 0:
-        return -1
-    else:
-        tempSp -= 1
-        return tempNum[tempSp]
-
-#gui
-def get_screen_size(window):
-    return window.winfo_screenwidth(),window.winfo_screenheight()
- 
-def get_window_size(window):
-    return window.winfo_reqwidth(),window.winfo_reqheight()
- 
-def center_window(root, width, height):
-    screenwidth, screenheight = get_screen_size(root)
-    size = '%dx%d+%d+%d' % (width, height, (screenwidth - width)/2, (screenheight - height)/2)
-    root.geometry(size)
+def tryAns():
+    sp = getNextBlank(-1)
+    while 1:
+        if not (sp >= 0 and sp < 81):
+            break
+        sudoku[sp] += 1
+        if sudoku[sp] > 9:
+            sudoku[sp] = 0
+            sp = Pop()
+        elif check(sp) == 0:
+            Push(sp)
+            sp = getNextBlank(sp)
 
 def _async_raise(tid, exctype):
     """raises the exception, performs cleanup if needed"""
@@ -126,30 +140,28 @@ def closeWindow():
         return
 
 win = Tk()
-win.title("Sudoku Solver")
-center_window(win, 700, 700)
-win.resizable(False, False)
+win.title('SUDOKU')
+win.geometry('630x800')
+win.resizable(0, 0)
 win.protocol('WM_DELETE_WINDOW', closeWindow)
+
+Start = Images.img1
+S = PhotoImage(data=Start)
+
+Clear = Images.img2
+C = PhotoImage(data=Clear)
+
+Type1 = Images.img3
+T1 = PhotoImage(data=Type1)
+
+Type2 = Images.img4
+T2 = PhotoImage(data=Type2)
 
 from icon import Icon
 with open('tmp.ico','wb') as tmp:
     tmp.write(base64.b64decode(Icon().img))
 win.iconbitmap('tmp.ico')
 os.remove('tmp.ico')
-
-A = "#FCF3B8"
-B = "#B6FCFA"
-color = [A,A,A,B,B,B,A,A,A,
-         A,A,A,B,B,B,A,A,A,
-         A,A,A,B,B,B,A,A,A,
-         B,B,B,A,A,A,B,B,B,
-         B,B,B,A,A,A,B,B,B,
-         B,B,B,A,A,A,B,B,B,
-         A,A,A,B,B,B,A,A,A,
-         A,A,A,B,B,B,A,A,A,
-         A,A,A,B,B,B,A,A,A]
-
-store = [False for i in range(81)]
 
 num = []
 entrys = []
@@ -159,47 +171,41 @@ for i in range(81):
     num.append(e)
 
 def test(content):
-    if content.isdigit() or content == "":
+    print(content)
+    if content.isdigit() or content == '':
         if len(content) <= 1:
             return True
-        else:
-            return False
+        return False
     else:
         return False
 
 test_cmd = win.register(test)
+num = []
+for i in range(81):
+    e = StringVar()
+    num.append(e)
 
+entrys = []
 x = 0
-a = 17
 for i in range(9):
-    b = 15
-    for j in range(9):        
-        e = Entry(master=win, textvariable=num[x], bg=color[x], width=3,
-                  font=("Helvetica", "21", "bold"), justify="center",
-                  validate='key', validatecommand=(test_cmd, '%P'))
-        e.place(x=a, y=b, anchor='nw')
+    for j in range(9):
+        e = Entry(master=win, width=3, font=("Helvetica", "21", "bold"), justify='center', 
+            textvariable=num[x], bg=Color[x], cursor='sizing', validate='key', validatecommand=(test_cmd, '%P'))
+        e.grid(row=i, column=j, padx=9, pady=10)
         entrys.append(e)
         x += 1
-        b += 60
-    a += 75
-
-Start = Images.img1
-S = PhotoImage(data=Start)
-
-Clear = Images.img2
-C = PhotoImage(data=Clear)
 
 frames = [PhotoImage(data=s) for s in Images.proc]
 Len = len(frames)
 def update(ind):
-    global win
+    global win, label_processing
     frame = frames[ind]
     ind += 1
     if ind == Len:
         ind = 0
-    label.configure(image=frame)
+    label_processing.configure(image=frame)
     win.after(50, update, ind)
-label = Label(master=win)
+label_processing = Label(master=win)
 win.after(0, update, 0)
 
 def read():
@@ -215,6 +221,11 @@ def read():
             store[i] = False
             entrys[i].configure(fg="black")
 
+def write():
+    for i in range(81):
+        if sudoku[i] != 0:
+            num[i].set(str(sudoku[i]))
+
 def show():
     global num, sudoku
     for i in range(81):
@@ -228,16 +239,16 @@ def full():
     return True
 
 def do_sudoku():
-    global b1, b2, label, entrys
+    global b1, b2, label_processing, entrys
     b1.configure(state="disable")
     b2.configure(state="disable")
     for e in entrys:
         e.configure(state="disable")
-    label.place(x=200, y=100, anchor='nw')  
+    label_processing.place(x=170, y=100, anchor='nw')  
     start_time = time.time()
     tryAns()
     end_time = time.time()
-    label.place_forget()
+    label_processing.place_forget()
     run_time = end_time - start_time
     Time = round(run_time * 1000) / 1000
     show()
@@ -247,17 +258,18 @@ def do_sudoku():
     for e in entrys:
         e.configure(state="normal")
 
-def _start():
+def go():
     global t
     read()
     if full():     
         messagebox.showinfo("", "Already solved!")
         return
     init()
-    t = threading.Thread(target = do_sudoku)
+    t = threading.Thread(target=do_sudoku)
+    t.setDaemon(True)
     t.start() 
 
-def _clear():
+def cl():
     global sudoku, num, store, entrys
     for i in range(81):
         num[i].set("")
@@ -265,10 +277,76 @@ def _clear():
         entrys[i].configure(fg="black")
         sudoku[i] = 0
 
-b1 = Button(master=win, image=S, command=_start)
-b1.place(x=70, y=570, anchor='nw')
+def keyIn():
+    print("input")
 
-b2 = Button(master=win, image=C, command=_clear)
-b2.place(x=380, y=570, anchor='nw')
+class MyDialog:
+    def __init__(self, parent):
+        top = self.top = Toplevel(parent)
+        top.resizable(0, 0)
+        top.wm_geometry("300x430")
+        top.attributes('-topmost', 'true')
+        top.grab_set()
+        top.wm_title('key in')
+        top.focus()
 
+        self.myTextBox = Text(top, font=("Helvetica", "20", "bold"), height=9, width=9, padx=0)
+        self.myTextBox.pack()
+
+        self.myOkButton = Button(top, text='Ok', command=self.ok)
+        self.myOkButton.pack()
+
+        self.myCancelButton = Button(top, text='Cancel', command=self.cancel)
+        self.myCancelButton.pack()
+
+    def ok(self):
+        global num
+        print('ok')
+        temp = self.myTextBox.get(1.0, END)
+        print(temp)
+        index = 0
+        for ch in temp:
+            if ch in '123456789':
+                num[index].set(ch)
+                index += 1
+            elif ch == '0':
+                index += 1
+            if index == 81:
+                break
+
+        self.top.destroy()
+
+    def cancel(self):
+        print('cancel')
+        self.top.destroy()
+
+def create_new_windows():
+    print("new windows")
+    inputDialog = MyDialog(win)
+    win.wait_window(inputDialog.top)
+
+class myLabel(Label):    
+    def __init__(self, master=None, image=None, cursor=None):
+        Label.__init__(self, master)
+        Label.config(self, image=image, cursor=cursor)
+        self.img = image
+        self.createWidgets()
+    def mouseEnter(self, event):
+        self.config(image=T2)
+    def mouseLeave(self, event):
+        self.config(image=T1)
+    def mouseClick(self, event):
+        create_new_windows()
+    def createWidgets(self):    
+        self.bind("<Enter>", self.mouseEnter)
+        self.bind("<Leave>", self.mouseLeave)
+        self.bind("<Button-1>", self.mouseClick)
+
+b1 = Button(master=win, image=S, command=go, cursor='star')
+b1.place(x=45, y=550, anchor='nw')
+b2 = Button(master=win, image=C, command=cl, cursor='pirate')
+b2.place(x=325, y=550, anchor='nw')
+tb = myLabel(master=win, image=T1, cursor='target')
+tb.place(x=260, y=700, anchor='nw')
+write()
 win.mainloop()
